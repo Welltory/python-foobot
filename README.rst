@@ -8,10 +8,6 @@ Install
 
    $ pip install foobot
 
-Configuration
--------------
-Add FOOBOT_API_KEY to settings.py
-
 Usage
 -----
 
@@ -20,6 +16,7 @@ Usage
    from foobot.api import FoobotAPI
 
    api = FoobotAPI(
+       api_key=<YOUR_API_KEY>,
        access_token=<YOUR_ACCESS_TOKEN>,
        homehost=<YOUR_HOME_HOST>,
        username=<YOUR_USER_EMAIL
