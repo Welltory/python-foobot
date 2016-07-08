@@ -1,6 +1,9 @@
 Foobot API library
 ==================
 
+http://foobot.io/ is awesome home air monitor solution, that helps you monitor and control your indoor air quality. 
+Welltory integrated with foobot.io and we share our Python API wrapper with you.
+
 Install
 -------
 
