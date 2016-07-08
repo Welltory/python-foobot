@@ -5,7 +5,7 @@ NAME = "foobot"
 DESCRIPTION = "python API wrapper for foobot.io"
 AUTHOR = "Welltory"
 AUTHOR_EMAIL = "hello@welltory.com"
-URL = "https://github.com/Welltory/foobotapi/"
+URL = "https://github.com/Welltory/python-foobot"
 VERSION = __import__(PACKAGE).__version__
 
 REQUIRES = [
