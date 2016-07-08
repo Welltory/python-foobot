@@ -6,7 +6,7 @@ Install
 
 .. code-block:: bash
 
-   $ pip install footbot
+   $ pip install foobot
 
 Configuration
 -------------
