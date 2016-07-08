@@ -4,9 +4,9 @@ Foobot API library
 Install
 -------
 
-.. code-block:: python
+.. code-block:: bash
 
-   pip install footbot
+   $ pip install footbot
 
 Configuration
 -------------
@@ -46,9 +46,9 @@ The MIT License (MIT)
 Tests
 -----
 
-.. code-block:: python
+.. code-block:: bash
 
-   python setup.py test
+   $ python setup.py test
 
 Contributors
 ------------
