@@ -6,7 +6,7 @@ Install
 
 .. code-block:: python
 
-   `pip install footbot`
+   pip install footbot
 
 Configuration
 -------------
@@ -17,17 +17,15 @@ Usage
 
 .. code-block:: python
 
-```
-from foobot.foobot import FootbotAPI
+   from foobot.foobot import FootbotAPI
 
-api = FootbotAPI(
-    access_token=<YOUR_ACCESS_TOKEN>,
-    homehost=<YOUR_HOME_HOST>,
-    username=<YOUR_USER_EMAIL
-)
-devices = api.get_devices()
-data_by_devices = api.get_last_day_data()
-```
+   api = FootbotAPI(
+       access_token=<YOUR_ACCESS_TOKEN>,
+       homehost=<YOUR_HOME_HOST>,
+       username=<YOUR_USER_EMAIL
+   )
+   devices = api.get_devices()
+   data_by_devices = api.get_last_day_data()
 
 API reference
 -------------
@@ -50,7 +48,7 @@ Tests
 
 .. code-block:: python
 
-   `python setup.py test`
+   python setup.py test
 
 Contributors
 ------------
