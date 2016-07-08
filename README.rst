@@ -4,7 +4,9 @@ Foobot API library
 Install
 -------
 
-  `pip install footbot`
+.. code-block:: python
+
+   `pip install footbot`
 
 Configuration
 -------------
@@ -12,6 +14,8 @@ Add FOOBOT_API_KEY to settings.py
 
 Usage
 -----
+
+.. code-block:: python
 
 ```
 from foobot.foobot import FootbotAPI
@@ -44,7 +48,9 @@ The MIT License (MIT)
 Tests
 -----
 
-  `python setup.py test`
+.. code-block:: python
+
+   `python setup.py test`
 
 Contributors
 ------------
