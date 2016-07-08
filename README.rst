@@ -4,7 +4,7 @@ Foobot API library
 Install
 -------
 
-`pip install footbot`
+  `pip install footbot`
 
 Configuration
 -------------
@@ -44,7 +44,7 @@ The MIT License (MIT)
 Tests
 -----
 
-`python setup.py test`
+  `python setup.py test`
 
 Contributors
 ------------
