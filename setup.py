@@ -8,9 +8,12 @@ AUTHOR_EMAIL = "hello@welltory.com"
 URL = "https://github.com/Welltory/python-foobot"
 VERSION = __import__(PACKAGE).__version__
 
-REQUIRES = [
-    'requests>=2.7',
-]
+
+requirements = [i.strip() for i in open("requirements.txt").readlines()]
+
+test_requirements = [i.strip() for i in
+                     open("requirements_test.txt").readlines()]
+
 
 setup(
     name=NAME,
@@ -23,7 +26,8 @@ setup(
     url=URL,
     packages=find_packages(exclude=["tests.*", "tests"]),
     test_suite='tests',
-    install_requires=REQUIRES,
+    tests_require=test_requirements,
+    install_requires=requirements,
     keywords=['air quality', 'sensor', 'IoT'],
     classifiers=[
         'Intended Audience :: End Users/Desktop',
