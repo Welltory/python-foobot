@@ -43,15 +43,13 @@ class FoobotAPI(object):
                  homehost,
                  username,
                  client_key=None,
-                 client_secret=None,
-                 refresh_token=None):
+                 client_secret=None):
         self.api_key = api_key
         self.homehost = homehost
         self.username = username
         self.access_token = access_token
         self.client_key = client_key
         self.client_secret = client_secret
-        self.refresh_token = refresh_token
 
         self.headers['Authorization'] = 'bearer {}'.format(self.access_token)
         self.headers['X-API-KEY-TOKEN'] = self.api_key
@@ -63,35 +61,39 @@ class FoobotAPI(object):
         return {}
 
     def _post(self, url, data):
-        response = requests.post(url, headers=self.headers)
+        response = requests.post(url, data=data)
         if response.status_code == 200:
             return response.json()
         raise RefreshTokenError(response.content)
 
-    def _url(self, url):
-        return 'https://{}/{}'.format(self.homehost, url)
+    def _url(self, url, home_host=None):
+        if home_host is None:
+            home_host = self.homehost
+        return 'https://{}/{}'.format(home_host, url)
 
     @property
     def region_token(self):
-        return self._get(self._url('v2/user/me/home/'))
+        return self._get(self._url('v2/user/me/home/',
+                                   home_host='api-us-east-1.foobot.io'))
 
-    def refresh_token(self):
+    def refresh_token(self, refresh_token):
         if not self.client_key:
             raise ValueError("Client key is not valid")
 
         if not self.client_secret:
             raise ValueError("Client key is not valid")
 
-        if not self.refresh_token:
+        if not refresh_token:
             raise ValueError("Refresh token is not valid")
 
         data = {
             'client_id': self.client_key,
             'client_secret': self.client_secret,
             'grant_type': 'refresh_token',
-            'refresh_token': self.refresh_token,
+            'refresh_token': refresh_token,
         }
-        return self._post(self._url('oauth2/token'), data)
+        return self._post(self._url('oauth2/token',
+                                    home_host='api-us-east-1.foobot.io'), data)
 
     def get_devices(self):
         return self._get(
