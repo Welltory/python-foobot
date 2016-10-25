@@ -97,7 +97,7 @@ class FoobotAPI(APIBase):
             'client_secret': self.client_secret,
             'access_token': self.access_token,
             'api_key': self.api_key,
-            'base_url_user': self.home_host,
+            'home_host': self.home_host,
             'base_url': self.base_url,
             'username': self.username,
         }
