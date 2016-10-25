@@ -22,7 +22,9 @@ Usage
        api_key=<YOUR_API_KEY>,
        access_token=<YOUR_ACCESS_TOKEN>,
        homehost=<YOUR_HOME_HOST>,
-       username=<YOUR_USER_EMAIL
+       username=<YOUR_USER_EMAIL,
+       client_key=<YOUR_CLIENT_KEY>,
+       client_secret=<YOUR_CLIENT_SECRET>,
    )
    devices = api.get_devices()
    data_by_devices = api.get_last_day_data()

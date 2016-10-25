@@ -4,14 +4,54 @@ import datetime
 
 import requests
 
+from foobot.error import *
+
 __all__ = [
     'FoobotAPI',
     'FoobotDataItem',
 ]
 
 
-class RefreshTokenError(Exception):
-    pass
+def check_execption(func):
+    def _check(*arg, **kws):
+        resp = func(*arg, **kws)
+        if resp.status_code >= 400:
+            if resp.status_code == 403:
+                raise FoobotOAuthError(401, 'UNAUTHORIZED')
+            else:
+                raise FoobotAPIError(resp)
+        body = resp.content
+        if body:
+            return resp.json()
+        return body
+
+    return _check
+
+
+class APIBase(object):
+    @property
+    def headers(self):
+        return {
+            'Authorization': 'bearer {}'.format(
+                self.credentials['access_token']),
+            'X-API-KEY-TOKEN': self.credentials['api_key']
+        }
+
+    @check_execption
+    def _get(self, url, base_url=None, **opts):
+        if 'headers' not in opts:
+            opts['headers'] = self.headers
+        return requests.get(self._url(url, base_url=base_url), **opts)
+
+    @check_execption
+    def _post(self, url, **opts):
+        return requests.post(self._url(url), **opts)
+
+    def _url(self, url, base_url=None):
+        return "https://{}/{}".format(
+            self.credentials['base_url'] if base_url is None else base_url,
+            url
+        )
 
 
 class FoobotDataItem(object):
@@ -24,7 +64,6 @@ class FoobotDataItem(object):
     foobot_index = None
 
     def __init__(self, data):
-        # print(data)
         self.timestamp = datetime.datetime.fromtimestamp(int(data[0]))
         self.particulate_matter = data[1]
         self.temp = data[2]
@@ -34,70 +73,58 @@ class FoobotDataItem(object):
         self.foobot_index = data[6]
 
 
-class FoobotAPI(object):
-    headers = {}
-
+class FoobotAPI(APIBase):
     def __init__(self,
                  api_key,
-                 access_token,
                  homehost,
                  username,
-                 client_key=None,
-                 client_secret=None):
-        self.api_key = api_key
-        self.homehost = homehost
+                 access_token,
+                 client_key,
+                 client_secret):
+        self.base_url = 'api-us-east-1.foobot.io'
+        self.home_host = homehost
         self.username = username
+
+        self.api_key = api_key
         self.access_token = access_token
         self.client_key = client_key
         self.client_secret = client_secret
 
-        self.headers['Authorization'] = 'bearer {}'.format(self.access_token)
-        self.headers['X-API-KEY-TOKEN'] = self.api_key
+    @property
+    def credentials(self):
+        return {
+            'client_key': self.client_key,
+            'client_secret': self.client_secret,
+            'access_token': self.access_token,
+            'api_key': self.api_key,
+            'base_url_user': self.home_host,
+            'base_url': self.base_url,
+            'username': self.username,
+        }
 
-    def _get(self, url):
-        response = requests.get(url, headers=self.headers)
-        if response.status_code == 200:
-            return response.json()
-        return {}
+    @property
+    def device(self):
+        return self._get(
+            'v2/owner/{}/device/'.format(self.credentials['username']),
+            base_url=self.credentials['home_host'],
+        )
 
-    def _post(self, url, data):
-        response = requests.post(url, data=data)
-        if response.status_code == 200:
-            return response.json()
-        raise RefreshTokenError(response.content)
-
-    def _url(self, url, home_host=None):
-        if home_host is None:
-            home_host = self.homehost
-        return 'https://{}/{}'.format(home_host, url)
+    def get_devices(self):
+        return self.device
 
     @property
     def region_token(self):
-        return self._get(self._url('v2/user/me/home/',
-                                   home_host='api-us-east-1.foobot.io'))
+        return self._get('v2/user/me/home/',
+                         base_url=self.credentials['home_host'])
 
     def refresh_token(self, refresh_token):
-        if not self.client_key:
-            raise ValueError("Client key is not valid")
-
-        if not self.client_secret:
-            raise ValueError("Client key is not valid")
-
-        if not refresh_token:
-            raise ValueError("Refresh token is not valid")
-
         data = {
-            'client_id': self.client_key,
-            'client_secret': self.client_secret,
+            'client_id': self.credentials['client_key'],
+            'client_secret': self.credentials['client_secret'],
             'grant_type': 'refresh_token',
             'refresh_token': refresh_token,
         }
-        return self._post(self._url('oauth2/token',
-                                    home_host='api-us-east-1.foobot.io'), data)
-
-    def get_devices(self):
-        return self._get(
-            self._url('v2/owner/{}/device/'.format(self.username)))
+        return self._post('oauth2/token', data=data)
 
     def get_data(self, start=None, end='last', average_by=3600):
         if start is None:
@@ -105,23 +132,23 @@ class FoobotAPI(object):
         data = []
         for dev in self.get_devices():
             url = 'v2/device/{}/datapoint/{}/{}/{}/'.format(
-                self.homehost,
                 dev['uuid'],
                 start,
                 end,
                 average_by
             )
-            item = self._get(self._url(url))
+            item = self._get(url, base_url=self.credentials['home_host'])
             if item:
                 data.append(item)
         return data
 
     def get_last_day_data(self, raw=False):
         data = self.get_data(start=3600 * 24, end='last')
+
         if raw:
             return data
-        else:
-            for i in range(len(data)):
-                data[i]['datapoints'] = [FoobotDataItem(d) for d in
-                                         data[i]['datapoints']]
-            return data
+
+        for i in range(len(data)):
+            data[i]['datapoints'] = [FoobotDataItem(d) for d in
+                                     data[i]['datapoints']]
+        return data
