@@ -29,18 +29,16 @@ def check_execption(func):
 
 
 class APIBase(object):
-    @property
-    def headers(self):
+    def headers(self, token):
         return {
-            'Authorization': 'bearer {}'.format(
-                self.credentials['access_token']),
+            'Authorization': 'bearer {}'.format(token),
             'X-API-KEY-TOKEN': self.credentials['api_key']
         }
 
     @check_execption
-    def _get(self, url, base_url=None, **opts):
+    def _get(self, url, base_url=None, token=None, **opts):
         if 'headers' not in opts:
-            opts['headers'] = self.headers
+            opts['headers'] = self.headers(token)
         return requests.get(self._url(url, base_url=base_url), **opts)
 
     @check_execption
@@ -80,7 +78,8 @@ class FoobotAPI(APIBase):
                  username,
                  access_token,
                  client_key,
-                 client_secret):
+                 client_secret,
+                 region_token=None):
         self.base_url = 'api-us-east-1.foobot.io'
         self.home_host = homehost
         self.username = username
@@ -89,6 +88,7 @@ class FoobotAPI(APIBase):
         self.access_token = access_token
         self.client_key = client_key
         self.client_secret = client_secret
+        self._region_token = region_token
 
     @property
     def credentials(self):
@@ -96,6 +96,7 @@ class FoobotAPI(APIBase):
             'client_key': self.client_key,
             'client_secret': self.client_secret,
             'access_token': self.access_token,
+            'region_token': self.region_token,
             'api_key': self.api_key,
             'home_host': self.home_host,
             'base_url': self.base_url,
@@ -107,6 +108,7 @@ class FoobotAPI(APIBase):
         return self._get(
             'v2/owner/{}/device/'.format(self.credentials['username']),
             base_url=self.credentials['home_host'],
+            token=self.credentials['region_token']
         )
 
     def get_devices(self):
@@ -114,8 +116,14 @@ class FoobotAPI(APIBase):
 
     @property
     def region_token(self):
-        return self._get('v2/user/me/home/',
-                         base_url=self.credentials['home_host'])
+        if self._region_token:
+            return self._region_token
+
+        token = self._get('v2/user/me/home/',
+                          base_url=self.credentials['home_host'],
+                          token=self.credentials['access_token'])
+        self._region_token = token
+        return token
 
     def refresh_token(self, refresh_token):
         data = {
@@ -137,7 +145,9 @@ class FoobotAPI(APIBase):
                 end,
                 average_by
             )
-            item = self._get(url, base_url=self.credentials['home_host'])
+            item = self._get(url,
+                             base_url=self.credentials['home_host'],
+                             token=self.credentials['region_token'])
             if item:
                 data.append(item)
         return data

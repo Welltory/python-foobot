@@ -32,6 +32,7 @@ class FoobotTestCase(unittest.TestCase):
         return FoobotAPI(
             api_key='TEST_API_KEY',
             access_token='TEST_API_TOKEN',
+            region_token='TEST_API_REGION_TOKEN',
             username='TEST_USERNAME',
             homehost='api-eu-west-1.foobot.io',
             client_key='',
@@ -42,7 +43,7 @@ class FoobotTestCase(unittest.TestCase):
         api = self.create_test_api()
         self.assertTrue(api.access_token == 'TEST_API_TOKEN')
         self.assertTrue(api.username == 'TEST_USERNAME')
-        self.assertTrue(api.home_host == 'http://api.foobot.io/')
+        self.assertTrue(api.home_host == 'api-eu-west-1.foobot.io')
 
     def test_get_devices(self):
         api = self.create_test_api()
