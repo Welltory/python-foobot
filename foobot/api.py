@@ -89,30 +89,28 @@ class FoobotAPI(APIBase):
         self.client_key = client_key
         self.client_secret = client_secret
         self._region_token = region_token
-        if not self._region_token:
-            self._region_token = self.region_token
 
     @property
     def credentials(self):
-        data = {
+        return {
             'client_key': self.client_key,
             'client_secret': self.client_secret,
             'access_token': self.access_token,
+            'region_token': self._region_token,
             'api_key': self.api_key,
             'home_host': self.home_host,
             'base_url': self.base_url,
             'username': self.username,
         }
-        if self._region_token:
-            data['region_token'] = self._region_token
-        return data
 
     @property
     def device(self):
+        token = self.credentials['region_token']
+        assert token, "Run `region_token`"
         return self._get(
             'v2/owner/{}/device/'.format(self.credentials['username']),
             base_url=self.credentials['home_host'],
-            token=self.credentials['region_token']
+            token=token
         )
 
     def get_devices(self):
@@ -136,6 +134,8 @@ class FoobotAPI(APIBase):
         return self._post('oauth2/token', data=data)
 
     def get_data(self, start=None, end='last', average_by=3600):
+        token = self.credentials['region_token']
+        assert token, "Run `region_token`"
         if start is None:
             start = 3600 * 24  # pragma: no cover
         data = []
@@ -148,7 +148,7 @@ class FoobotAPI(APIBase):
             )
             item = self._get(url,
                              base_url=self.credentials['home_host'],
-                             token=self.credentials['region_token'])
+                             token=token)
             if item:
                 data.append(item)
         return data
