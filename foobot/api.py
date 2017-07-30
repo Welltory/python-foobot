@@ -89,19 +89,23 @@ class FoobotAPI(APIBase):
         self.client_key = client_key
         self.client_secret = client_secret
         self._region_token = region_token
+        if not self._region_token:
+            self._region_token = self.region_token
 
     @property
     def credentials(self):
-        return {
+        data = {
             'client_key': self.client_key,
             'client_secret': self.client_secret,
             'access_token': self.access_token,
-            'region_token': self.region_token,
             'api_key': self.api_key,
             'home_host': self.home_host,
             'base_url': self.base_url,
             'username': self.username,
         }
+        if self._region_token:
+            data['region_token'] = self._region_token
+        return data
 
     @property
     def device(self):
@@ -116,9 +120,6 @@ class FoobotAPI(APIBase):
 
     @property
     def region_token(self):
-        if self._region_token:
-            return self._region_token
-
         token = self._get('v2/user/me/home/',
                           base_url=self.credentials['home_host'],
                           token=self.credentials['access_token'])
